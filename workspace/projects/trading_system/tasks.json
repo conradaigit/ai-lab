@@ -1,0 +1,33 @@
+{
+  "project": "trading_system",
+  "tasks": [
+    {
+      "id": "TS-001",
+      "title": "Populate core operating and workspace memory files",
+      "status": "in_progress",
+      "priority": "high",
+      "notes": "Fill AGENTS.md, SYSTEM_OPERATING_MANUAL.md, CURRENT_CONTEXT.md, state.json, tasks.json, constraints.md, and ops.md."
+    },
+    {
+      "id": "TS-002",
+      "title": "Implement and verify start_session.py",
+      "status": "todo",
+      "priority": "high",
+      "notes": "Script should read current repo memory and print a startup brief."
+    },
+    {
+      "id": "TS-003",
+      "title": "Implement and verify close_session.py",
+      "status": "todo",
+      "priority": "high",
+      "notes": "Script should append a session note and refresh project state/context."
+    },
+    {
+      "id": "TS-004",
+      "title": "Create initial git commit",
+      "status": "todo",
+      "priority": "medium",
+      "notes": "Commit Phase 1 foundation scaffold."
+    }
+  ]
+}
