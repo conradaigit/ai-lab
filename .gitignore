@@ -22,7 +22,8 @@ env/
 # OS / editor
 .DS_Store
 Thumbs.db
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 
 # Jupyter

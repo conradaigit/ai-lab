@@ -153,9 +153,13 @@ When closing a session:
 - capture important decisions
 - capture blockers/issues
 - capture next actions
+- update memory files
 - update project state
 - update tasks if needed
 - refresh current context
+- run the health check if appropriate
+- commit meaningful completed work
+- push to GitHub
 - append project session note
 - record cross-project lessons only if they are genuinely reusable
 

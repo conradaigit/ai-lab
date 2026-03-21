@@ -400,11 +400,15 @@ When the user says `Close session`, the intended flow is:
 - capture important decisions
 - capture blockers/issues
 - capture next actions
+- update memory files
 - update project `state.json`
 - update project `tasks.json` if needed
 - update `active_plan.md` if needed
 - update `progress.md` if needed
 - update `failure_registry.md` if needed
+- run the health check if appropriate
+- commit meaningful completed work
+- push to GitHub
 - append a project session note
 - append a global session note only if cross-project learning matters
 - refresh `workspace/CURRENT_CONTEXT.md`
