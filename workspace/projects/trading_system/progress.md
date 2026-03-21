@@ -1,6 +1,7 @@
 # trading_system progress
 
 ## Completed
+- Phase 1 local-first foundation completed
 - WSL installed and working
 - Ubuntu/WSL confirmed as primary development environment
 - canonical repo created at `~/dev/ai-lab`
@@ -19,15 +20,16 @@
   - single-writer workspace rule
   - health check script
   - receipt-aware session start/close behavior
+- Phase 1.5 reliability hardening committed successfully
 
 ## Current milestone
-Phase 1.5 reliability hardening is complete.
+Phase 1 local-first foundation and Phase 1.5 reliability hardening are complete.
 
 ## Immediate next move
-Review and commit the reliability hardening changes, then open `~/dev/ai-lab` in VS Code from WSL and configure Codex.
+Verify and normalize the local VS Code + Codex workflow from WSL.
 
 ## Why this matters
 The repo-native agent operating model is now cleaner, safer, and more machine-readable. The next step is to move normal coding work into a local repo-backed Codex workflow.
 
 ## Next milestone
-VS Code running from WSL with Codex operating inside `~/dev/ai-lab` and following the startup protocol in `AGENTS.md`.
+WSL-backed VS Code + Codex workflow verified, normalized, and aligned with the startup protocol in `AGENTS.md`.

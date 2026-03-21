@@ -38,10 +38,10 @@
     },
     {
       "id": "TS-010",
-      "title": "Open VS Code from WSL and configure Codex",
+      "title": "Verify and normalize WSL-backed VS Code + Codex workflow",
       "status": "todo",
       "priority": "medium",
-      "notes": "Run code . from ~/dev/ai-lab and verify Codex follows AGENTS.md."
+      "notes": "Verify code . opens ~/dev/ai-lab from WSL, confirm Codex follows AGENTS.md, and normalize any local workflow issues."
     }
   ]
 }

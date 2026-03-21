@@ -5,12 +5,11 @@ Stand up the local-first architecture so a coding agent can operate reliably wit
 
 ## Current scope
 - keep the core operating docs aligned
-- complete the Phase 1.5 reliability hardening layer
-- commit the reliability hardening changes cleanly
-- move into VS Code + Codex from WSL
+- verify and normalize the WSL-backed VS Code + Codex workflow
 - preserve rebuildability and reliability
 
 ## Success criteria
+- Phase 1 local-first foundation is complete and reflected in workspace memory
 - `schemas/memory_object_base.json` exists
 - `docs/SECRETS_INVENTORY.md` exists
 - `AGENTS.md` reflects the single-writer rule
@@ -20,13 +19,12 @@ Stand up the local-first architecture so a coding agent can operate reliably wit
 - repo state remains coherent and machine-readable
 - VS Code opens `~/dev/ai-lab` from WSL
 - Codex can operate inside `~/dev/ai-lab`
+- current-state workspace files reflect the completed Phase 1.5 work and current workflow focus
 
 ## Ordered next steps
-1. review the Phase 1.5 changes
-2. commit the Phase 1.5 reliability hardening work
-3. open the repo from WSL with `code .`
-4. install/configure Codex
-5. verify Codex reads the startup files and follows `AGENTS.md`
+1. verify the repo opens from WSL with `code .`
+2. verify and normalize Codex startup behavior against `AGENTS.md`
+3. record any workflow adjustments back into workspace memory
 
 ## Current step
-Step 7–9: verification, commit, then VS Code + Codex
+Step 1-3: verify and normalize WSL-backed VS Code + Codex

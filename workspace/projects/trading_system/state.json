@@ -3,23 +3,25 @@
   "status": "active",
   "phase": "phase_1_5_complete",
   "objective": "Build a local-first, rebuildable agent operating system with explicit repo memory, lightweight reliability hardening, and a clean path to local Codex operation before deeper cloud and automation work.",
-  "current_focus": "Review and commit the completed Phase 1.5 reliability hardening changes, then open the repo in VS Code from WSL and configure Codex.",
+  "current_focus": "Verify and normalize the local VS Code + Codex workflow from WSL.",
   "last_completed": [
+    "Completed Phase 1 local-first foundation",
     "Defined the base memory object schema",
     "Added the secrets inventory document",
     "Updated AGENTS.md with the single-writer workspace rule",
     "Implemented the health check script",
     "Implemented receipt-aware start_session.py behavior",
     "Implemented receipt-aware close_session.py behavior",
-    "Verified health check, startup, and close-session receipt behavior"
+    "Verified health check, startup, and close-session receipt behavior",
+    "Committed the Phase 1.5 reliability hardening changes"
   ],
   "blockers": [],
   "next_actions": [
-    "Review git diff and commit the Phase 1.5 reliability hardening changes",
-    "Open ~/dev/ai-lab in VS Code from WSL using code .",
-    "Install and configure Codex",
-    "Verify Codex follows the startup protocol in AGENTS.md"
+    "Verify code . opens ~/dev/ai-lab correctly from WSL",
+    "Verify and normalize Codex startup behavior against AGENTS.md",
+    "Refresh workspace memory based on the verified local VS Code + Codex workflow"
   ],
+  "git_status_before_refresh": "clean",
   "last_started_at_utc": null,
   "last_closed_at_utc": "2026-03-21T00:58:31+00:00"
 }

@@ -4,9 +4,10 @@
 trading_system
 
 ## Current focus
-Phase 1.5 reliability hardening is complete. The immediate next step is opening the repo in VS Code from WSL and configuring Codex.
+Phase 1 local-first foundation and Phase 1.5 reliability hardening are complete. The immediate current focus is to verify and normalize the local VS Code + Codex workflow from WSL.
 
 ## Last completed work
+- Completed Phase 1 local-first foundation
 - Defined the base memory object schema
 - Added `docs/SECRETS_INVENTORY.md`
 - Updated `AGENTS.md` with the single-writer workspace rule
@@ -16,11 +17,12 @@ Phase 1.5 reliability hardening is complete. The immediate next step is opening 
 - Verified health check output
 - Verified start-session behavior
 - Verified close-session receipt behavior
+- Committed the Phase 1.5 reliability hardening changes
 
 ## Next 1-3 actions
-1. Review `git diff` and commit the Phase 1.5 reliability hardening changes
-2. Open `~/dev/ai-lab` in VS Code from WSL using `code .`
-3. Install/configure Codex and verify it follows `AGENTS.md`
+1. Verify `code .` opens `~/dev/ai-lab` correctly from WSL
+2. Verify and normalize Codex startup behavior against `AGENTS.md`
+3. Record any workflow adjustments back into workspace memory
 
 ## Important files to review first
 - `AGENTS.md`
@@ -33,4 +35,5 @@ Phase 1.5 reliability hardening is complete. The immediate next step is opening 
 - `workspace/projects/trading_system/progress.md`
 
 ## Notes
+- `git status --short` was clean before this refresh
 `workspace/close_session_receipt.json` is a rolling runtime reliability file and should not be committed.
