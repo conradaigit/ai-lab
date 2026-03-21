@@ -2,32 +2,46 @@
   "project": "trading_system",
   "tasks": [
     {
-      "id": "TS-001",
-      "title": "Populate core operating and workspace memory files",
-      "status": "in_progress",
+      "id": "TS-005",
+      "title": "Define base memory object schema",
+      "status": "completed",
       "priority": "high",
-      "notes": "Fill AGENTS.md, SYSTEM_OPERATING_MANUAL.md, CURRENT_CONTEXT.md, state.json, tasks.json, constraints.md, and ops.md."
+      "notes": "Implemented as schemas/memory_object_base.json."
     },
     {
-      "id": "TS-002",
-      "title": "Implement and verify start_session.py",
-      "status": "todo",
+      "id": "TS-006",
+      "title": "Define secrets pattern and inventory doc",
+      "status": "completed",
       "priority": "high",
-      "notes": "Script should read current repo memory and print a startup brief."
+      "notes": "Implemented as docs/SECRETS_INVENTORY.md."
     },
     {
-      "id": "TS-003",
-      "title": "Implement and verify close_session.py",
-      "status": "todo",
+      "id": "TS-007",
+      "title": "Add single-writer workspace rule",
+      "status": "completed",
       "priority": "high",
-      "notes": "Script should append a session note and refresh project state/context."
+      "notes": "Implemented in AGENTS.md."
     },
     {
-      "id": "TS-004",
-      "title": "Create initial git commit",
+      "id": "TS-008",
+      "title": "Implement health check script",
+      "status": "completed",
+      "priority": "high",
+      "notes": "Implemented as scripts/dev/health_check.py and verified."
+    },
+    {
+      "id": "TS-009",
+      "title": "Add receipt-aware close/start behavior",
+      "status": "completed",
+      "priority": "high",
+      "notes": "Implemented in start_session.py and close_session.py and verified."
+    },
+    {
+      "id": "TS-010",
+      "title": "Open VS Code from WSL and configure Codex",
       "status": "todo",
       "priority": "medium",
-      "notes": "Commit Phase 1 foundation scaffold."
+      "notes": "Run code . from ~/dev/ai-lab and verify Codex follows AGENTS.md."
     }
   ]
 }

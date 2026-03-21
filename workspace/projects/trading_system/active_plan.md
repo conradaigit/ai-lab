@@ -1,29 +1,32 @@
 # trading_system active plan
 
 ## Objective
-Stand up the local-first architecture so a coding agent can operate reliably with explicit repo memory, verification, and minimal operator friction.
+Stand up the local-first architecture so a coding agent can operate reliably with explicit repo memory, verification, lightweight reliability hardening, and minimal operator friction.
 
 ## Current scope
-- tighten core operating docs
-- establish machine-readable memory scaffolding
-- get Codex operational locally in VS Code
+- keep the core operating docs aligned
+- complete the Phase 1.5 reliability hardening layer
+- commit the reliability hardening changes cleanly
+- move into VS Code + Codex from WSL
 - preserve rebuildability and reliability
 
 ## Success criteria
-- AGENTS.md updated
-- SYSTEM_OPERATING_MANUAL.md updated
-- active_plan.md exists
-- progress.md exists
-- failure_registry.md exists
-- memory/objects/ structure exists
+- `schemas/memory_object_base.json` exists
+- `docs/SECRETS_INVENTORY.md` exists
+- `AGENTS.md` reflects the single-writer rule
+- `scripts/dev/health_check.py` exists and runs
+- `start_session.py` warns on incomplete prior close if needed
+- `close_session.py` records receipt progress
+- repo state remains coherent and machine-readable
+- VS Code opens `~/dev/ai-lab` from WSL
 - Codex can operate inside `~/dev/ai-lab`
 
 ## Ordered next steps
-1. update operating docs
-2. add machine-readable memory scaffolding
-3. install/configure Codex local workflow
-4. verify repo-local agent operation
-5. record results and next actions
+1. review the Phase 1.5 changes
+2. commit the Phase 1.5 reliability hardening work
+3. open the repo from WSL with `code .`
+4. install/configure Codex
+5. verify Codex reads the startup files and follows `AGENTS.md`
 
 ## Current step
-Step 1 and 2: operating docs and memory scaffolding
+Step 7–9: verification, commit, then VS Code + Codex

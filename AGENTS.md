@@ -40,9 +40,10 @@ Only after the user answers, read the selected project's files:
 Then:
 
 5. Summarize the current state in plain language
-6. Propose today's 1–3 concrete tasks
-7. State the intended verification/check step
-8. Begin work
+6. Run the lightweight health check if available
+7. Propose today's 1–3 concrete tasks
+8. State the intended verification/check step
+9. Begin work
 
 Do not skip step 4 unless the active project is already explicitly provided in the current session.
 
@@ -121,6 +122,27 @@ Typical write-back targets:
 - `workspace/projects/<project>/failure_registry.md`
 - project session note
 - typed memory objects when present
+
+## Single-writer workspace rule
+
+Only one agent should write to workspace memory files in a given session unless explicit coordination is in place.
+
+This applies especially to:
+- `workspace/CURRENT_CONTEXT.md`
+- `workspace/projects/<project>/state.json`
+- `workspace/projects/<project>/tasks.json`
+- `workspace/projects/<project>/active_plan.md`
+- `workspace/projects/<project>/progress.md`
+- `workspace/projects/<project>/failure_registry.md`
+
+Other agents may read these files, but workspace writes should have one active owner per session.
+
+## Session brief rule
+
+A generated `session_brief.md` is allowed as a convenience artifact, but it is derived output only.
+
+It is not a source of truth.
+Canonical truth remains in the underlying repo files.
 
 ## Close-session rule
 

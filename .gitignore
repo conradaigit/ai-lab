@@ -36,3 +36,6 @@ data/**
 
 # Logs
 *.log
+
+# Rolling session receipt
+workspace/close_session_receipt.json

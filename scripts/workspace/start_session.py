@@ -22,6 +22,45 @@ def latest_session_note(project_sessions_dir: Path) -> Path | None:
     return notes[-1] if notes else None
 
 
+def print_receipt_warning(repo_root: Path, receipt_path: Path) -> None:
+    if not receipt_path.exists():
+        return
+
+    try:
+        receipt = load_json(receipt_path)
+    except Exception as exc:
+        print("WARNING: close_session_receipt.json exists but could not be parsed.")
+        print(f"- error: {exc}")
+        print("- Review workspace state before trusting it.")
+        print()
+        return
+
+    status = receipt.get("status")
+    if status not in {"in_progress", "failed"}:
+        return
+
+    print("WARNING: Previous close session did not complete cleanly.")
+    print(f"- receipt status : {status}")
+    if receipt.get("session_id"):
+        print(f"- session_id     : {receipt['session_id']}")
+    if receipt.get("started_at"):
+        print(f"- started_at_utc : {receipt['started_at']}")
+    if receipt.get("error"):
+        print(f"- error          : {receipt['error']}")
+
+    attempted = receipt.get("writes_attempted", [])
+    completed = set(receipt.get("writes_completed", []))
+    stale = [item for item in attempted if item not in completed]
+
+    if stale:
+        print("- review these potentially stale files before trusting current state:")
+        for item in stale:
+            print(f"  - {item}")
+
+    print("- recommended next check: python3 scripts/dev/health_check.py")
+    print()
+
+
 def main() -> int:
     repo_root = Path(__file__).resolve().parents[2]
     workspace = repo_root / "workspace"
@@ -43,6 +82,7 @@ def main() -> int:
     ops_path = project_dir / "ops.md"
     current_context_path = workspace / "CURRENT_CONTEXT.md"
     last_context_path = workspace / "global" / "last_context.json"
+    receipt_path = workspace / "close_session_receipt.json"
     sessions_dir = project_dir / "sessions"
 
     state = load_json(state_path)
@@ -65,6 +105,9 @@ def main() -> int:
     print(f"Project     : {project}")
     print(f"Started UTC : {now}")
     print()
+
+    print_receipt_warning(repo_root, receipt_path)
+
     print("Read first:")
     print(f"- {repo_root / 'AGENTS.md'}")
     print(f"- {repo_root / 'docs' / 'SYSTEM_OPERATING_MANUAL.md'}")
@@ -89,8 +132,10 @@ def main() -> int:
         print(f"- {task.get('id', '?')} [{task.get('status', '?')}] {task.get('title', '')}")
 
     print()
-    print("Next step:")
-    print("Propose today's 1-3 tasks before making major changes.")
+    print("Recommended next checks:")
+    print("- Review the files listed above")
+    print("- Run: python3 scripts/dev/health_check.py")
+    print("- Then propose today's 1-3 tasks before making major changes")
     return 0
 
 
