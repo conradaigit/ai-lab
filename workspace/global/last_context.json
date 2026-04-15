@@ -1,18 +1,17 @@
 {
-  "last_opened_project": "trading_system",
-  "current_focus": "Run close-session receipt test",
+  "last_opened_project": "workspace_system",
+  "current_focus": "Frozen v1 workspace contracts and scripts are implemented; next focus is notebook integration and real Drive end-to-end validation.",
   "last_completed_work": [
-    "Added memory schema",
-    "added secrets inventory",
-    "updated AGENTS single-writer rule",
-    "added health check",
-    "updated CURRENT_CONTEXT and project state files"
+    "Implemented frozen v1 schemas for projects registry, session context, codex handoff, and close receipt",
+    "Implemented exporter flow for interpreter snapshot and codex handoff with Drive mirror paths",
+    "Implemented Start Workspace and Close Workspace scripts with explicit repo_backed vs drive_native branching",
+    "Verified both flows with local dry-runs and successful py_compile checks"
   ],
   "next_actions": [
-    "Run close-session receipt test",
-    "verify receipt-aware startup",
-    "commit Phase 1.5 changes"
+    "Wire the Start Workspace notebook cells to the frozen v1 behavior",
+    "Wire the Close Workspace notebook cells to the frozen v1 behavior",
+    "Run a real Drive end-to-end trial for repo_backed and drive_native projects"
   ],
-  "last_started_at_utc": "2026-03-21T00:58:46+00:00",
-  "last_closed_at_utc": "2026-03-21T00:58:31+00:00"
+  "last_started_at_utc": "2026-04-15T00:00:00+00:00",
+  "last_closed_at_utc": null
 }

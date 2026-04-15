@@ -1,39 +1,36 @@
 # CURRENT_CONTEXT
 
 ## Active project
-trading_system
+workspace_system
 
 ## Current focus
-Phase 1 local-first foundation and Phase 1.5 reliability hardening are complete. The immediate current focus is to verify and normalize the local VS Code + Codex workflow from WSL.
+Frozen v1 workspace contracts and scripts are implemented. Immediate focus is wiring the notebook cells and running real Drive end-to-end validation.
 
 ## Last completed work
-- Completed Phase 1 local-first foundation
-- Defined the base memory object schema
-- Added `docs/SECRETS_INVENTORY.md`
-- Updated `AGENTS.md` with the single-writer workspace rule
-- Added `scripts/dev/health_check.py`
-- Updated `scripts/workspace/start_session.py` for receipt-aware startup guidance
-- Updated `scripts/workspace/close_session.py` for receipt-aware close behavior
-- Verified health check output
-- Verified start-session behavior
-- Verified close-session receipt behavior
-- Committed the Phase 1.5 reliability hardening changes
+- Added frozen v1 schemas for registry/session context/codex handoff/close receipt
+- Implemented repo exporter outputs in `scripts/workspace/export_repo_context.py`
+- Implemented Start Workspace flow in `scripts/workspace/start_workspace.py`
+- Implemented Close Workspace flow in `scripts/workspace/close_workspace.py`
+- Verified dry-runs for both `repo_backed` and `drive_native` branches with `py_compile` passing
 
 ## Next 1-3 actions
-1. Verify `code .` opens `~/dev/ai-lab` correctly from WSL
-2. Verify and normalize Codex startup behavior against `AGENTS.md`
-3. Record any workflow adjustments back into workspace memory
+1. Integrate script-equivalent logic into actual Colab Start Workspace notebook cells
+2. Integrate script-equivalent logic into actual Colab Close Workspace notebook cells
+3. Run one real Drive end-to-end trial for both project types and confirm the `SESSION_CONTEXT_JSON`/handoff loop
 
 ## Important files to review first
 - `AGENTS.md`
 - `docs/SYSTEM_OPERATING_MANUAL.md`
-- `docs/SECRETS_INVENTORY.md`
-- `schemas/memory_object_base.json`
-- `workspace/projects/trading_system/state.json`
-- `workspace/projects/trading_system/tasks.json`
-- `workspace/projects/trading_system/active_plan.md`
-- `workspace/projects/trading_system/progress.md`
+- `workspace/registry/projects.json`
+- `schemas/workspace/projects_registry.v1.json`
+- `schemas/workspace/session_context.v1.json`
+- `schemas/workspace/codex_handoff.v1.json`
+- `schemas/workspace/close_workspace_receipt.v1.json`
+- `workspace/projects/workspace_system/state.json`
+- `workspace/projects/workspace_system/tasks.json`
 
 ## Notes
-- `git status --short` was clean before this refresh
-`workspace/close_session_receipt.json` is a rolling runtime reliability file and should not be committed.
+- Runtime path mapping should resolve Drive-relative roots per environment:
+  - Colab: `/content/drive/MyDrive/...`
+  - WSL: `/mnt/g/My Drive/...`
+- Runtime exporter files remain local runtime artifacts and are intentionally ignored in Git.

@@ -1,0 +1,33 @@
+{
+  "project": "workspace_system",
+  "tasks": [
+    {
+      "id": "WS-001",
+      "title": "Freeze workspace contracts v1",
+      "status": "completed",
+      "priority": "high",
+      "notes": "Schema versioning, repo_context_mode, nullable latest_reasoning_note, and repo_snapshot null behavior for drive_native."
+    },
+    {
+      "id": "WS-002",
+      "title": "Implement repo-side snapshot and handoff exporters",
+      "status": "completed",
+      "priority": "high",
+      "notes": "Write repo-local outputs and Drive mirror copies for repo_backed projects."
+    },
+    {
+      "id": "WS-003",
+      "title": "Implement Start Workspace flow",
+      "status": "completed",
+      "priority": "high",
+      "notes": "Load Drive memory, branch on project type, output one SESSION_CONTEXT_JSON payload."
+    },
+    {
+      "id": "WS-004",
+      "title": "Implement Close Workspace flow",
+      "status": "completed",
+      "priority": "high",
+      "notes": "Consume Codex handoff for repo_backed, update Drive memory files, emit close receipt."
+    }
+  ]
+}

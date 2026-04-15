@@ -1,0 +1,32 @@
+{
+  "schema_version": "1",
+  "projects": [
+    {
+      "project_slug": "workspace_system",
+      "display_name": "Workspace System",
+      "project_type": "repo_backed",
+      "status": "active",
+      "canonical_layer": {
+        "implementation_state": "repo",
+        "continuity_pm_state": "drive"
+      },
+      "drive_paths": {
+        "project_root": "_ai/projects/workspace_system"
+      },
+      "repo_binding": {
+        "repo_url": "https://github.com/conradaigit/ai-lab.git",
+        "default_branch": "main",
+        "workspace_path": "/home/conradunix/dev/ai-lab",
+        "repo_project_key": "workspace_system"
+      },
+      "last_session_at": "2026-04-15T02:13:27+00:00",
+      "tags": [
+        "workspace",
+        "colab",
+        "chatgpt-continuity"
+      ],
+      "created_at": "2026-04-14T00:00:00Z",
+      "updated_at": "2026-04-15T02:13:27+00:00"
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-lab.local/schemas/workspace/projects_registry.v1.json",
+  "title": "Workspace Projects Registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "projects"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project_slug",
+          "display_name",
+          "project_type",
+          "status",
+          "canonical_layer",
+          "drive_paths",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "project_slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9_\\-]+$"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "project_type": {
+            "enum": [
+              "repo_backed",
+              "drive_native"
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "paused",
+              "archived"
+            ]
+          },
+          "canonical_layer": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "implementation_state",
+              "continuity_pm_state"
+            ],
+            "properties": {
+              "implementation_state": {
+                "enum": [
+                  "repo",
+                  "drive"
+                ]
+              },
+              "continuity_pm_state": {
+                "const": "drive"
+              }
+            }
+          },
+          "drive_paths": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "project_root"
+            ],
+            "properties": {
+              "project_root": {
+                "type": "string",
+                "pattern": "^_ai/projects/[a-zA-Z0-9_\\-./]+$"
+              }
+            }
+          },
+          "repo_binding": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "repo_url",
+              "default_branch"
+            ],
+            "properties": {
+              "repo_url": {
+                "type": "string",
+                "minLength": 1
+              },
+              "default_branch": {
+                "type": "string",
+                "minLength": 1
+              },
+              "workspace_path": {
+                "type": "string"
+              },
+              "repo_project_key": {
+                "type": "string"
+              }
+            }
+          },
+          "last_session_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "project_type": {
+                  "const": "repo_backed"
+                }
+              },
+              "required": [
+                "project_type"
+              ]
+            },
+            "then": {
+              "required": [
+                "repo_binding"
+              ],
+              "properties": {
+                "canonical_layer": {
+                  "properties": {
+                    "implementation_state": {
+                      "const": "repo"
+                    }
+                  }
+                },
+                "repo_binding": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "project_type": {
+                  "const": "drive_native"
+                }
+              },
+              "required": [
+                "project_type"
+              ]
+            },
+            "then": {
+              "allOf": [
+                {
+                  "properties": {
+                    "canonical_layer": {
+                      "properties": {
+                        "implementation_state": {
+                          "const": "drive"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "anyOf": [
+                    {
+                      "not": {
+                        "required": [
+                          "repo_binding"
+                        ]
+                      }
+                    },
+                    {
+                      "properties": {
+                        "repo_binding": {
+                          "type": "null"
+                        }
+                      },
+                      "required": [
+                        "repo_binding"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-lab.local/schemas/workspace/close_workspace_receipt.v1.json",
+  "title": "Close Workspace Receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "generated_at",
+    "project_slug",
+    "project_type",
+    "repo_context_mode",
+    "writes",
+    "inputs_captured",
+    "repo_handoff_consumed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "contract_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "project_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\-]+$"
+    },
+    "project_type": {
+      "enum": [
+        "repo_backed",
+        "drive_native"
+      ]
+    },
+    "repo_context_mode": {
+      "enum": [
+        "required",
+        "absent"
+      ]
+    },
+    "writes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reasoning_note_written",
+        "timeline_updated",
+        "profile_updated",
+        "milestones_updated"
+      ],
+      "properties": {
+        "reasoning_note_written": {
+          "type": "boolean"
+        },
+        "timeline_updated": {
+          "type": "boolean"
+        },
+        "profile_updated": {
+          "type": "boolean"
+        },
+        "milestones_updated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "inputs_captured": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objective",
+        "completed_count",
+        "decisions_count",
+        "issues_count",
+        "next_actions_count"
+      ],
+      "properties": {
+        "objective": {
+          "type": "string"
+        },
+        "completed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "decisions_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "issues_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "next_actions_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "repo_handoff_consumed": {
+      "type": "boolean"
+    },
+    "reasoning_note_path": {
+      "type": "string"
+    }
+  }
+}

@@ -40,3 +40,8 @@ data/**
 
 # Rolling session receipt
 workspace/close_session_receipt.json
+
+# Workspace runtime exports
+workspace/interpreter_snapshot.json
+workspace/interpreter_snapshot.md
+workspace/codex_handoff.json

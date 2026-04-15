@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-lab.local/schemas/workspace/session_context.v1.json",
+  "title": "Start Workspace Session Context v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "generated_at",
+    "project_slug",
+    "project_type",
+    "repo_context_mode",
+    "canonical_layer",
+    "drive_context",
+    "repo_snapshot",
+    "execution_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "contract_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "project_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\-]+$"
+    },
+    "project_type": {
+      "enum": [
+        "repo_backed",
+        "drive_native"
+      ]
+    },
+    "repo_context_mode": {
+      "enum": [
+        "required",
+        "absent"
+      ]
+    },
+    "canonical_layer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation_state",
+        "continuity_pm_state"
+      ],
+      "properties": {
+        "implementation_state": {
+          "enum": [
+            "repo",
+            "drive"
+          ]
+        },
+        "continuity_pm_state": {
+          "const": "drive"
+        }
+      }
+    },
+    "drive_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project_root",
+        "profile",
+        "goals_markdown",
+        "milestones",
+        "timeline_recent",
+        "latest_reasoning_note"
+      ],
+      "properties": {
+        "project_root": {
+          "type": "string",
+          "pattern": "^_ai/projects/[a-zA-Z0-9_\\-./]+$"
+        },
+        "profile": {
+          "type": "object"
+        },
+        "goals_markdown": {
+          "type": "string"
+        },
+        "milestones": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "timeline_recent": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "latest_reasoning_note": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "timestamp",
+            "summary"
+          ],
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "summary": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "repo_snapshot": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "source_path",
+        "project",
+        "snapshot_generated_at",
+        "branch",
+        "head_commit",
+        "dirty_clean",
+        "current_focus",
+        "last_completed_work",
+        "next_1_3_actions",
+        "task_summary",
+        "active_plan_summary",
+        "progress_summary",
+        "latest_session_summary"
+      ],
+      "properties": {
+        "source_path": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string",
+          "pattern": "^[a-z0-9_\\-]+$"
+        },
+        "snapshot_generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "head_commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{7,40}$"
+        },
+        "dirty_clean": {
+          "enum": [
+            "dirty",
+            "clean"
+          ]
+        },
+        "current_focus": {
+          "type": "string"
+        },
+        "last_completed_work": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "next_1_3_actions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "type": "string"
+          }
+        },
+        "task_summary": {
+          "type": "string"
+        },
+        "active_plan_summary": {
+          "type": "string"
+        },
+        "progress_summary": {
+          "type": "string"
+        },
+        "latest_session_summary": {
+          "type": "string"
+        }
+      }
+    },
+    "execution_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chatgpt_planning_required_before_codex_execution"
+      ],
+      "properties": {
+        "chatgpt_planning_required_before_codex_execution": {
+          "const": true
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "project_type": {
+            "const": "repo_backed"
+          }
+        },
+        "required": [
+          "project_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "repo_context_mode": {
+            "const": "required"
+          },
+          "canonical_layer": {
+            "properties": {
+              "implementation_state": {
+                "const": "repo"
+              }
+            }
+          },
+          "repo_snapshot": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "project_type": {
+            "const": "drive_native"
+          }
+        },
+        "required": [
+          "project_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "repo_context_mode": {
+            "const": "absent"
+          },
+          "canonical_layer": {
+            "properties": {
+              "implementation_state": {
+                "const": "drive"
+              }
+            }
+          },
+          "repo_snapshot": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}
