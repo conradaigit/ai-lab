@@ -45,3 +45,4 @@ workspace/close_session_receipt.json
 workspace/interpreter_snapshot.json
 workspace/interpreter_snapshot.md
 workspace/codex_handoff.json
+workspace/projects/*/codex_published_state.v1.json

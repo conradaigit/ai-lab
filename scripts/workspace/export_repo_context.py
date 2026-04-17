@@ -4,8 +4,9 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -70,6 +71,21 @@ def parse_section_list(markdown: str, heading: str) -> list[str]:
     return [item for item in items if item]
 
 
+def parse_markdown_list(path: Path) -> list[str]:
+    if not path.exists():
+        return []
+    lines = path.read_text(encoding="utf-8").splitlines()
+    items: list[str] = []
+    for raw in lines:
+        stripped = raw.strip()
+        if stripped.startswith("- "):
+            items.append(stripped[2:].strip())
+        elif stripped and stripped[0].isdigit() and ". " in stripped:
+            _, value = stripped.split(". ", 1)
+            items.append(value.strip())
+    return [item for item in items if item]
+
+
 def first_nonempty_line(path: Path, fallback: str) -> str:
     if not path.exists():
         return fallback
@@ -79,6 +95,31 @@ def first_nonempty_line(path: Path, fallback: str) -> str:
             continue
         return line
     return fallback
+
+def normalize_argv(argv: list[str], modes: set[str]) -> list[str]:
+    if not argv or argv[0] not in modes:
+        return argv
+    mode = argv[0]
+    rest = argv[1:]
+    global_flags = {"--project", "--registry", "--runtime", "--drive-root", "--skip-drive-sync"}
+    reordered: list[str] = []
+    specific_args: list[str] = []
+    i = 0
+    while i < len(rest):
+        token = rest[i]
+        if token in global_flags:
+            reordered.append(token)
+            if token == "--skip-drive-sync":
+                i += 1
+                continue
+            if i + 1 >= len(rest):
+                raise ValueError(f"Missing value for {token}")
+            reordered.append(rest[i + 1])
+            i += 2
+        else:
+            specific_args.append(token)
+            i += 1
+    return reordered + [mode] + specific_args
 
 
 def latest_session_summary(sessions_dir: Path) -> str:
@@ -226,6 +267,48 @@ def flatten(values: list[str] | None) -> list[str]:
     if not values:
         return []
     return [item.strip() for item in values if item and item.strip()]
+
+
+def build_published_state(repo_root: Path, project_slug: str) -> dict[str, Any]:
+    workspace = repo_root / "workspace"
+    project_dir = workspace / "projects" / project_slug
+    state_path = project_dir / "state.json"
+    active_plan_path = project_dir / "active_plan.md"
+    failure_registry_path = project_dir / "failure_registry.md"
+
+    state = load_json(state_path) if state_path.exists() else {}
+    active_task = first_nonempty_line(active_plan_path, "")
+    if not active_task:
+        active_task = None
+
+    recent_completions = state.get("last_completed")
+    if not isinstance(recent_completions, list):
+        recent_completions = []
+    recent_completions = [str(item).strip() for item in recent_completions if str(item).strip()]
+
+    blockers = parse_markdown_list(failure_registry_path)
+
+    branch = run_git(repo_root, "rev-parse", "--abbrev-ref", "HEAD")
+    commit_ref = run_git(repo_root, "rev-parse", "HEAD")
+    dirty_clean = "clean" if not run_git(repo_root, "status", "--porcelain") else "dirty"
+
+    generated_at = now_utc()
+    stale_after = (datetime.fromisoformat(generated_at) + timedelta(hours=24)).isoformat()
+
+    return {
+        "schema_version": "1",
+        "project_slug": project_slug,
+        "generated_at": generated_at,
+        "stale_after": stale_after,
+        "active_task": active_task,
+        "recent_completions": recent_completions,
+        "blockers": blockers,
+        "questions_for_strategy": [],
+        "build_test_status": "unknown",
+        "commit_ref": commit_ref,
+        "branch": branch,
+        "dirty_clean": dirty_clean,
+    }
 
 
 def write_snapshot_outputs(
@@ -382,11 +465,20 @@ def main() -> int:
     handoff_parser.add_argument("--issues", action="append", default=[])
     handoff_parser.add_argument("--next-actions", action="append", default=[])
 
-    args = parser.parse_args()
+    subparsers.add_parser("publish-state", help="Export Codex published state.")
+
+    args = parser.parse_args(normalize_argv(sys.argv[1:], {"snapshot", "handoff", "publish-state"}))
     repo_root = Path(__file__).resolve().parents[2]
     registry_path = (repo_root / args.registry).resolve()
     project_item = load_registry_project(registry_path, args.project)
     validate_repo_backed(project_item)
+
+    if args.mode == "publish-state":
+        published = build_published_state(repo_root, args.project)
+        output_path = repo_root / "workspace" / "projects" / args.project / "codex_published_state.v1.json"
+        save_json(output_path, published)
+        print(json.dumps({"published_state_written": str(output_path)}))
+        return 0
 
     snapshot = build_snapshot(repo_root, args.project)
     snapshot_paths = write_snapshot_outputs(
