@@ -129,6 +129,16 @@ def latest_reasoning_note(reasoning_dir: Path, project_root_rel: str) -> dict[st
     return {"path": relative_path, "timestamp": mtime, "summary": summary}
 
 
+def load_optional_json(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    try:
+        payload = load_json(path)
+    except (json.JSONDecodeError, OSError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
 def parse_milestones(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -338,6 +348,7 @@ def command_delete(args: argparse.Namespace, registry: dict[str, Any], registry_
 
 
 def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root: Path, output_path: Path | None) -> int:
+    repo_root = Path(__file__).resolve().parents[2]
     item = get_project(registry, args.project)
     validate_project_item(item)
     project_root_rel = item["drive_paths"]["project_root"]
@@ -346,15 +357,19 @@ def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root
 
     repo_snapshot_payload: dict[str, Any] | None
     repo_mode: str
+    codex_published_state: dict[str, Any] | None = None
+    published_state_path = repo_root / "workspace" / "projects" / item["project_slug"] / "codex_published_state.v1.json"
     if item["project_type"] == "repo_backed":
         require(paths["repo_snapshot_json"].exists(), f"Missing snapshot: {paths['repo_snapshot_json']}")
         raw_snapshot = load_json(paths["repo_snapshot_json"])
         source_path = f"{project_root_rel}/repo_snapshot/latest_interpreter_snapshot.json"
         repo_snapshot_payload = normalize_repo_snapshot(raw_snapshot, source_path)
         repo_mode = "required"
+        codex_published_state = load_optional_json(published_state_path)
     else:
         repo_snapshot_payload = None
         repo_mode = "absent"
+        codex_published_state = None
 
     payload = {
         "schema_version": "1",
@@ -366,6 +381,7 @@ def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root
         "canonical_layer": item["canonical_layer"],
         "drive_context": drive_context,
         "repo_snapshot": repo_snapshot_payload,
+        "codex_published_state": codex_published_state,
         "execution_gate": {"chatgpt_planning_required_before_codex_execution": True},
     }
     validate_session_context(payload)
