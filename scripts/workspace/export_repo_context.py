@@ -368,6 +368,29 @@ def write_handoff_outputs(
     return outputs
 
 
+def write_published_state_outputs(
+    repo_root: Path,
+    published: dict[str, Any],
+    project_item: dict[str, Any],
+    runtime: str,
+    drive_root_override: str | None,
+    sync_drive: bool,
+) -> dict[str, Path]:
+    project_slug = str(project_item["project_slug"])
+    repo_published = repo_root / "workspace" / "projects" / project_slug / "codex_published_state.v1.json"
+    save_json(repo_published, published)
+    outputs = {"repo_published_state_json": repo_published}
+    if not sync_drive:
+        return outputs
+
+    drive_root = resolve_drive_root(runtime, drive_root_override)
+    project_root_rel = str(project_item["drive_paths"]["project_root"])
+    drive_published = drive_root / project_root_rel / "repo_snapshot" / "latest_codex_published_state.v1.json"
+    save_json(drive_published, published)
+    outputs["drive_published_state_json"] = drive_published
+    return outputs
+
+
 def build_handoff(
     repo_root: Path,
     project_slug: str,
@@ -475,9 +498,15 @@ def main() -> int:
 
     if args.mode == "publish-state":
         published = build_published_state(repo_root, args.project)
-        output_path = repo_root / "workspace" / "projects" / args.project / "codex_published_state.v1.json"
-        save_json(output_path, published)
-        print(json.dumps({"published_state_written": str(output_path)}))
+        publish_paths = write_published_state_outputs(
+            repo_root=repo_root,
+            published=published,
+            project_item=project_item,
+            runtime=args.runtime,
+            drive_root_override=args.drive_root,
+            sync_drive=not args.skip_drive_sync,
+        )
+        print(json.dumps({"published_state_written": {k: str(v) for k, v in publish_paths.items()}}, indent=2))
         return 0
 
     snapshot = build_snapshot(repo_root, args.project)

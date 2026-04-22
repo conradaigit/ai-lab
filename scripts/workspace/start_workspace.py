@@ -51,6 +51,7 @@ def derive_project_paths(project_abs_root: Path) -> dict[str, Path]:
         "reasoning_notes_dir": project_abs_root / "reasoning_notes",
         "repo_snapshot_json": project_abs_root / "repo_snapshot" / "latest_interpreter_snapshot.json",
         "repo_snapshot_md": project_abs_root / "repo_snapshot" / "latest_interpreter_snapshot.md",
+        "drive_published_state_json": project_abs_root / "repo_snapshot" / "latest_codex_published_state.v1.json",
     }
 
 
@@ -137,6 +138,19 @@ def load_optional_json(path: Path) -> dict[str, Any] | None:
     except (json.JSONDecodeError, OSError):
         return None
     return payload if isinstance(payload, dict) else None
+
+
+def load_published_state(
+    drive_published_state_path: Path,
+    repo_published_state_path: Path,
+) -> tuple[dict[str, Any] | None, str]:
+    payload = load_optional_json(drive_published_state_path)
+    if payload is not None:
+        return payload, "drive_mirror"
+    payload = load_optional_json(repo_published_state_path)
+    if payload is not None:
+        return payload, "repo_local_fallback"
+    return None, "null"
 
 
 def parse_milestones(path: Path) -> list[dict[str, Any]]:
@@ -365,7 +379,10 @@ def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root
         source_path = f"{project_root_rel}/repo_snapshot/latest_interpreter_snapshot.json"
         repo_snapshot_payload = normalize_repo_snapshot(raw_snapshot, source_path)
         repo_mode = "required"
-        codex_published_state = load_optional_json(published_state_path)
+        codex_published_state, _codex_published_state_source = load_published_state(
+            drive_published_state_path=paths["drive_published_state_json"],
+            repo_published_state_path=published_state_path,
+        )
     else:
         repo_snapshot_payload = None
         repo_mode = "absent"
