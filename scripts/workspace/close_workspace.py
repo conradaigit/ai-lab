@@ -230,6 +230,12 @@ def apply_milestone_updates(milestones_path: Path, updates_file: Path | None, co
     return True
 
 
+def ensure_milestones_initialized(milestones_path: Path) -> None:
+    if milestones_path.exists():
+        return
+    save_json(milestones_path, {"schema_version": "1", "milestones": []})
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Close Workspace flow for Drive continuity updates.")
     parser.add_argument("--registry", default="workspace/registry/projects.json")
@@ -306,6 +312,7 @@ def main() -> int:
         status_override=args.status,
     )
 
+    ensure_milestones_initialized(paths["milestones"])
     milestone_updates_file = resolve_path(args.milestone_updates_json, repo_root) if args.milestone_updates_json else None
     milestones_updated = apply_milestone_updates(
         milestones_path=paths["milestones"],
