@@ -7,13 +7,15 @@
   "required": [
     "schema_version",
     "contract_version",
+    "session_id",
     "generated_at",
     "project_slug",
     "project_type",
     "repo_context_mode",
     "writes",
     "inputs_captured",
-    "repo_handoff_consumed"
+    "repo_handoff_consumed",
+    "next_session_focus"
   ],
   "properties": {
     "schema_version": {
@@ -21,6 +23,10 @@
     },
     "contract_version": {
       "const": "1.0"
+    },
+    "session_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$"
     },
     "generated_at": {
       "type": "string",
@@ -100,6 +106,9 @@
     },
     "repo_handoff_consumed": {
       "type": "boolean"
+    },
+    "next_session_focus": {
+      "type": "string"
     },
     "reasoning_note_path": {
       "type": "string"

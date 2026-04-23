@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -43,6 +44,14 @@ def resolve_path(path_value: str, repo_root: Path) -> Path:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def is_uuid4(value: str) -> bool:
+    try:
+        parsed = uuid.UUID(value)
+    except (ValueError, TypeError):
+        return False
+    return parsed.version == 4 and str(parsed) == value.lower()
 
 
 def normalize_items(values: list[str] | None) -> list[str]:
@@ -196,6 +205,7 @@ def update_profile(
     project_item: dict[str, Any],
     generated_at: str,
     status_override: str | None,
+    next_session_focus: str,
 ) -> None:
     if profile_path.exists():
         profile = load_json(profile_path)
@@ -212,6 +222,7 @@ def update_profile(
     profile["updated_at"] = generated_at
     profile["last_session_at"] = generated_at
     profile["status"] = status_override or project_item.get("status", "active")
+    profile["next_session_focus"] = next_session_focus
     save_json(profile_path, profile)
 
 
@@ -242,11 +253,13 @@ def main() -> int:
     parser.add_argument("--runtime", choices=["wsl", "colab"], default="wsl")
     parser.add_argument("--drive-root", default=None)
     parser.add_argument("--project", required=True)
+    parser.add_argument("--session-id", required=True)
     parser.add_argument("--objective", required=True)
     parser.add_argument("--completed", action="append", default=[])
     parser.add_argument("--decisions", action="append", default=[])
     parser.add_argument("--issues", action="append", default=[])
     parser.add_argument("--next-actions", action="append", default=[])
+    parser.add_argument("--next-session-focus", default=None)
     parser.add_argument("--status", choices=["active", "paused", "archived"], default=None)
     parser.add_argument("--milestone-updates-json", default=None)
     parser.add_argument("--confirm-milestone-updates", action="store_true")
@@ -268,6 +281,10 @@ def main() -> int:
     next_actions = normalize_items(args.next_actions)
     require(objective, "objective is required.")
     require(next_actions, "At least one next action is required.")
+    session_id = args.session_id.strip().lower()
+    require(session_id, "--session-id is required.")
+    require(is_uuid4(session_id), "--session-id must be a UUIDv4 string.")
+    next_session_focus = args.next_session_focus.strip() if args.next_session_focus else next_actions[0]
 
     generated_at = now_utc()
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
@@ -310,6 +327,7 @@ def main() -> int:
         project_item=project_item,
         generated_at=generated_at,
         status_override=args.status,
+        next_session_focus=next_session_focus,
     )
 
     ensure_milestones_initialized(paths["milestones"])
@@ -329,6 +347,7 @@ def main() -> int:
     receipt = {
         "schema_version": "1",
         "contract_version": "1.0",
+        "session_id": session_id,
         "generated_at": generated_at,
         "project_slug": project_item["project_slug"],
         "project_type": project_item["project_type"],
@@ -347,6 +366,7 @@ def main() -> int:
             "next_actions_count": len(next_actions),
         },
         "repo_handoff_consumed": repo_handoff_consumed,
+        "next_session_focus": next_session_focus,
         "reasoning_note_path": str(note_path),
     }
 

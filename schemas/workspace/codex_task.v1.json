@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-lab.local/schemas/workspace/codex_task.v1.json",
+  "title": "Strategy to Codex Task v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_version",
+    "task_id",
+    "project_slug",
+    "created_at",
+    "created_by",
+    "title",
+    "objective",
+    "priority",
+    "constraints",
+    "acceptance_criteria",
+    "status",
+    "status_history",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1"
+    },
+    "contract_version": {
+      "const": "1.0"
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9_\\-]+$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by": {
+      "type": "string",
+      "enum": [
+        "strategy"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "priority": {
+      "enum": [
+        "low",
+        "normal",
+        "high",
+        "urgent"
+      ]
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "path"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "file",
+              "json",
+              "note"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "enum": [
+        "ready",
+        "accepted",
+        "in_progress",
+        "blocked",
+        "completed",
+        "cancelled"
+      ]
+    },
+    "status_history": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "at",
+          "from",
+          "to",
+          "note"
+        ],
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "from": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "to": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

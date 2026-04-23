@@ -29,6 +29,7 @@ REQUIRED_FILES = [
     "schemas/memory_object_base.json",
     "schemas/workspace/projects_registry.v1.json",
     "schemas/workspace/session_context.v1.json",
+    "schemas/workspace/codex_task.v1.json",
     "schemas/workspace/codex_handoff.v1.json",
     "schemas/workspace/close_workspace_receipt.v1.json",
     "docs/SECRETS_INVENTORY.md",

@@ -7,7 +7,10 @@
   "required": [
     "schema_version",
     "contract_version",
+    "session_id",
     "generated_at",
+    "stale_after",
+    "context_hash",
     "project_slug",
     "project_type",
     "repo_context_mode",
@@ -24,9 +27,21 @@
     "contract_version": {
       "const": "1.0"
     },
+    "session_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$"
+    },
     "generated_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "stale_after": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
     },
     "project_slug": {
       "type": "string",
@@ -72,7 +87,8 @@
         "goals_markdown",
         "milestones",
         "timeline_recent",
-        "latest_reasoning_note"
+        "latest_reasoning_note",
+        "next_session_focus"
       ],
       "properties": {
         "project_root": {
@@ -120,6 +136,12 @@
               "type": "string"
             }
           }
+        },
+        "next_session_focus": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },

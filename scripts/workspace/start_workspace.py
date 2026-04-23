@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
-from datetime import datetime, timezone
+import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +42,28 @@ def resolve_path(path_value: str, repo_root: Path) -> Path:
     if path.is_absolute():
         return path
     return (repo_root / path).resolve()
+
+
+def stale_after_24h(generated_at: str) -> str:
+    return (datetime.fromisoformat(generated_at) + timedelta(hours=24)).isoformat()
+
+
+def compute_context_hash(payload: dict[str, Any]) -> str:
+    # Canonical subset excludes volatile fields: generated_at, stale_after, session_id.
+    subset = {
+        "schema_version": payload["schema_version"],
+        "contract_version": payload["contract_version"],
+        "project_slug": payload["project_slug"],
+        "project_type": payload["project_type"],
+        "repo_context_mode": payload["repo_context_mode"],
+        "canonical_layer": payload["canonical_layer"],
+        "drive_context": payload["drive_context"],
+        "repo_snapshot": payload["repo_snapshot"],
+        "codex_published_state": payload["codex_published_state"],
+        "execution_gate": payload["execution_gate"],
+    }
+    canonical_json = json.dumps(subset, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
 
 
 def derive_project_paths(project_abs_root: Path) -> dict[str, Path]:
@@ -202,6 +226,15 @@ def normalize_repo_snapshot(snapshot: dict[str, Any], source_path: str) -> dict[
 def validate_session_context(payload: dict[str, Any]) -> None:
     require(payload.get("schema_version") == "1", "SESSION_CONTEXT_JSON schema_version must be '1'.")
     require(payload.get("contract_version") == "1.0", "SESSION_CONTEXT_JSON contract_version must be '1.0'.")
+    session_id = payload.get("session_id")
+    require(isinstance(session_id, str) and session_id, "SESSION_CONTEXT_JSON requires non-empty session_id.")
+    try:
+        parsed = uuid.UUID(session_id)
+    except (ValueError, TypeError):
+        raise ValueError("SESSION_CONTEXT_JSON session_id must be a valid UUID.") from None
+    require(parsed.version == 4, "SESSION_CONTEXT_JSON session_id must be UUIDv4.")
+    context_hash = payload.get("context_hash")
+    require(isinstance(context_hash, str) and len(context_hash) == 64, "SESSION_CONTEXT_JSON context_hash must be 64-char hex.")
     project_type = payload.get("project_type")
     repo_mode = payload.get("repo_context_mode")
     repo_snapshot = payload.get("repo_snapshot")
@@ -223,6 +256,9 @@ def load_drive_context(project_item: dict[str, Any], project_abs_root: Path) -> 
     milestones = parse_milestones(paths["milestones"])
     timeline_recent = parse_timeline_events(paths["timeline"])
     note = latest_reasoning_note(paths["reasoning_notes_dir"], project_item["drive_paths"]["project_root"])
+    next_session_focus = profile.get("next_session_focus")
+    if not isinstance(next_session_focus, str) or not next_session_focus.strip():
+        next_session_focus = None
     drive_context = {
         "project_root": project_item["drive_paths"]["project_root"],
         "profile": profile,
@@ -230,6 +266,7 @@ def load_drive_context(project_item: dict[str, Any], project_abs_root: Path) -> 
         "milestones": milestones,
         "timeline_recent": timeline_recent,
         "latest_reasoning_note": note,
+        "next_session_focus": next_session_focus,
     }
     return drive_context, paths
 
@@ -272,6 +309,7 @@ def initialize_project_memory(
             "created_at": project_item["created_at"],
             "updated_at": project_item["updated_at"],
             "last_session_at": project_item.get("last_session_at"),
+            "next_session_focus": None,
         }
         save_json(profile_path, profile_payload)
     if not paths["goals"].exists():
@@ -388,10 +426,13 @@ def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root
         repo_mode = "absent"
         codex_published_state = None
 
+    generated_at = now_utc()
     payload = {
         "schema_version": "1",
         "contract_version": "1.0",
-        "generated_at": now_utc(),
+        "session_id": str(uuid.uuid4()),
+        "generated_at": generated_at,
+        "stale_after": stale_after_24h(generated_at),
         "project_slug": item["project_slug"],
         "project_type": item["project_type"],
         "repo_context_mode": repo_mode,
@@ -401,6 +442,7 @@ def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root
         "codex_published_state": codex_published_state,
         "execution_gate": {"chatgpt_planning_required_before_codex_execution": True},
     }
+    payload["context_hash"] = compute_context_hash(payload)
     validate_session_context(payload)
     serialized = json.dumps(payload, indent=2)
     if output_path is not None:
