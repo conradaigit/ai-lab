@@ -18,6 +18,9 @@
     "drive_context",
     "repo_snapshot",
     "codex_published_state",
+    "startup_brief",
+    "agent_expected_behavior",
+    "agent_contract",
     "execution_gate"
   ],
   "properties": {
@@ -227,6 +230,128 @@
         "object",
         "null"
       ]
+    },
+    "startup_brief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project_launched",
+        "current_focus",
+        "next_actions",
+        "project_type",
+        "recent_completions",
+        "issues_or_blockers",
+        "execution_gate"
+      ],
+      "properties": {
+        "project_launched": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "project_slug",
+            "display_name"
+          ],
+          "properties": {
+            "project_slug": {
+              "type": "string",
+              "pattern": "^[a-z0-9_\\-]+$"
+            },
+            "display_name": {
+              "type": "string"
+            }
+          }
+        },
+        "current_focus": {
+          "type": "string"
+        },
+        "next_actions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "type": "string"
+          }
+        },
+        "project_type": {
+          "enum": [
+            "repo_backed",
+            "drive_native"
+          ]
+        },
+        "recent_completions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "issues_or_blockers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "execution_gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "chatgpt_planning_required_before_codex_execution"
+          ],
+          "properties": {
+            "chatgpt_planning_required_before_codex_execution": {
+              "const": true
+            }
+          }
+        }
+      }
+    },
+    "agent_expected_behavior": {
+      "type": "string"
+    },
+    "agent_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_next_step",
+        "required_steps",
+        "required_summary_fields",
+        "optional_summary_fields",
+        "default_next_step",
+        "avoid"
+      ],
+      "properties": {
+        "required_next_step": {
+          "type": "string"
+        },
+        "required_steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_summary_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "optional_summary_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "default_next_step": {
+          "type": "string"
+        },
+        "avoid": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "execution_gate": {
       "type": "object",

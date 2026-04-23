@@ -183,6 +183,7 @@ def append_timeline_event(
     timeline_path: Path,
     generated_at: str,
     objective: str,
+    current_focus: str,
     completed: list[str],
     decisions: list[str],
     issues: list[str],
@@ -209,10 +210,12 @@ def append_timeline_event(
         "timestamp": generated_at,
         "event_type": "session_close",
         "objective": objective,
+        "current_focus": current_focus,
         "completed": completed,
         "decisions": decisions,
         "issues": issues,
         "next_actions": next_actions,
+        "execution_gate": {"chatgpt_planning_required_before_codex_execution": True},
         "repo_handoff_ref": repo_handoff_ref,
     }
     events.append(event)
@@ -224,8 +227,13 @@ def update_profile(
     profile_path: Path,
     project_item: dict[str, Any],
     generated_at: str,
+    session_id: str,
     status_override: str | None,
     next_session_focus: str,
+    objective: str,
+    completed: list[str],
+    issues: list[str],
+    next_actions: list[str],
 ) -> None:
     if profile_path.exists():
         profile = load_json(profile_path)
@@ -243,6 +251,16 @@ def update_profile(
     profile["last_session_at"] = generated_at
     profile["status"] = status_override or project_item.get("status", "active")
     profile["next_session_focus"] = next_session_focus
+    profile["latest_close_summary"] = {
+        "updated_at": generated_at,
+        "session_id": session_id,
+        "objective": objective,
+        "current_focus": next_session_focus,
+        "recent_completions": completed[:5],
+        "issues_or_blockers": issues,
+        "next_actions": next_actions[:3],
+        "execution_gate": {"chatgpt_planning_required_before_codex_execution": True},
+    }
     save_json(profile_path, profile)
 
 
@@ -347,6 +365,7 @@ def main() -> int:
         timeline_path=paths["timeline"],
         generated_at=generated_at,
         objective=objective,
+        current_focus=next_session_focus,
         completed=completed,
         decisions=decisions,
         issues=issues,
@@ -357,8 +376,13 @@ def main() -> int:
         profile_path=paths["profile"],
         project_item=project_item,
         generated_at=generated_at,
+        session_id=session_id,
         status_override=args.status,
         next_session_focus=next_session_focus,
+        objective=objective,
+        completed=completed,
+        issues=issues,
+        next_actions=next_actions,
     )
 
     ensure_milestones_initialized(paths["milestones"])

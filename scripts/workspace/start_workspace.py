@@ -60,6 +60,7 @@ def compute_context_hash(payload: dict[str, Any]) -> str:
         "drive_context": payload["drive_context"],
         "repo_snapshot": payload["repo_snapshot"],
         "codex_published_state": payload["codex_published_state"],
+        "startup_brief": payload["startup_brief"],
         "execution_gate": payload["execution_gate"],
     }
     canonical_json = json.dumps(subset, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
@@ -223,6 +224,122 @@ def parse_timeline_events(path: Path) -> list[dict[str, Any]]:
     return events_list[-RECENT_TIMELINE_LIMIT:]
 
 
+def first_nonempty_string(*values: Any) -> str | None:
+    for value in values:
+        if isinstance(value, str):
+            candidate = value.strip()
+            if candidate:
+                return candidate
+    return None
+
+
+def normalize_string_list(values: Any, limit: int) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    normalized = [str(item).strip() for item in values if str(item).strip()]
+    return normalized[:limit]
+
+
+def latest_session_close_event(events: list[dict[str, Any]]) -> dict[str, Any] | None:
+    for entry in reversed(events):
+        if isinstance(entry, dict) and entry.get("event_type") == "session_close":
+            return entry
+    return None
+
+
+def derive_startup_brief(
+    project_item: dict[str, Any],
+    drive_context: dict[str, Any],
+    repo_snapshot_payload: dict[str, Any] | None,
+    codex_published_state: dict[str, Any] | None,
+    execution_gate: dict[str, Any],
+) -> dict[str, Any]:
+    profile = drive_context.get("profile") if isinstance(drive_context.get("profile"), dict) else {}
+    timeline_recent = drive_context.get("timeline_recent") if isinstance(drive_context.get("timeline_recent"), list) else []
+    latest_close = latest_session_close_event(timeline_recent)
+    latest_close_summary = profile.get("latest_close_summary") if isinstance(profile.get("latest_close_summary"), dict) else {}
+
+    next_session_focus = first_nonempty_string(drive_context.get("next_session_focus"))
+    repo_focus = first_nonempty_string(repo_snapshot_payload.get("current_focus")) if isinstance(repo_snapshot_payload, dict) else None
+    published_active_task = first_nonempty_string(codex_published_state.get("active_task")) if isinstance(codex_published_state, dict) else None
+    close_focus = first_nonempty_string(
+        latest_close_summary.get("current_focus"),
+        latest_close.get("current_focus") if isinstance(latest_close, dict) else None,
+    )
+
+    current_focus = first_nonempty_string(
+        close_focus,
+        next_session_focus,
+        repo_focus,
+        published_active_task,
+    )
+    if current_focus is None:
+        current_focus = "Review latest continuity state and define immediate focus."
+
+    next_actions = normalize_string_list(latest_close_summary.get("next_actions"), 3)
+    if not next_actions and isinstance(latest_close, dict):
+        next_actions = normalize_string_list(latest_close.get("next_actions"), 3)
+    if not next_actions and isinstance(repo_snapshot_payload, dict):
+        next_actions = normalize_string_list(repo_snapshot_payload.get("next_1_3_actions"), 3)
+    if not next_actions:
+        next_actions = [current_focus]
+
+    recent_completions = normalize_string_list(latest_close_summary.get("recent_completions"), 5)
+    if not recent_completions and isinstance(latest_close, dict):
+        recent_completions = normalize_string_list(latest_close.get("completed"), 5)
+    if not recent_completions and isinstance(codex_published_state, dict):
+        recent_completions = normalize_string_list(codex_published_state.get("recent_completions"), 5)
+    if not recent_completions and isinstance(repo_snapshot_payload, dict):
+        recent_completions = normalize_string_list(repo_snapshot_payload.get("last_completed_work"), 5)
+
+    issues_or_blockers = normalize_string_list(latest_close_summary.get("issues_or_blockers"), 5)
+    if not issues_or_blockers and isinstance(latest_close, dict):
+        issues_or_blockers = normalize_string_list(latest_close.get("issues"), 5)
+    if not issues_or_blockers and isinstance(codex_published_state, dict):
+        issues_or_blockers = normalize_string_list(codex_published_state.get("blockers"), 5)
+
+    return {
+        "project_launched": {
+            "project_slug": project_item["project_slug"],
+            "display_name": project_item["display_name"],
+        },
+        "current_focus": current_focus,
+        "next_actions": next_actions,
+        "project_type": project_item["project_type"],
+        "recent_completions": recent_completions,
+        "issues_or_blockers": issues_or_blockers,
+        "execution_gate": execution_gate,
+    }
+
+
+def build_session_agent_contract() -> dict[str, Any]:
+    return {
+        "required_next_step": "summarize_startup_brief_then_choose_next_step",
+        "required_steps": [
+            "1.) summarize project_launched, current_focus, and next_actions concisely.",
+            "2.) if useful, include project_type, recent_completions, issues_or_blockers, and execution_gate.",
+            "3.) then ask a neutral next-step question: continue planning here, or prepare a handoff for the next step.",
+        ],
+        "required_summary_fields": [
+            "project_launched",
+            "current_focus",
+            "next_actions",
+        ],
+        "optional_summary_fields": [
+            "project_type",
+            "recent_completions",
+            "issues_or_blockers",
+            "execution_gate",
+        ],
+        "default_next_step": "continue_planning_in_chat",
+        "avoid": [
+            "long_architecture_restatement_without_need",
+            "jumping_directly_to_tool_specific_handoff_by_default",
+            "mentioning_codex_without_context_or_user_request",
+        ],
+    }
+
+
 def normalize_repo_snapshot(snapshot: dict[str, Any], source_path: str) -> dict[str, Any]:
     required_keys = [
         "project",
@@ -255,6 +372,27 @@ def validate_session_context(payload: dict[str, Any]) -> None:
     require(parsed.version == 4, "SESSION_CONTEXT_JSON session_id must be UUIDv4.")
     context_hash = payload.get("context_hash")
     require(isinstance(context_hash, str) and len(context_hash) == 64, "SESSION_CONTEXT_JSON context_hash must be 64-char hex.")
+    agent_expected_behavior = payload.get("agent_expected_behavior")
+    require(
+        isinstance(agent_expected_behavior, str) and bool(agent_expected_behavior.strip()),
+        "SESSION_CONTEXT_JSON requires non-empty agent_expected_behavior.",
+    )
+    agent_contract = payload.get("agent_contract")
+    require(isinstance(agent_contract, dict), "SESSION_CONTEXT_JSON requires agent_contract object.")
+    for required_key in (
+        "required_next_step",
+        "required_steps",
+        "required_summary_fields",
+        "optional_summary_fields",
+        "default_next_step",
+        "avoid",
+    ):
+        require(required_key in agent_contract, f"SESSION_CONTEXT_JSON agent_contract missing {required_key}.")
+    startup_brief = payload.get("startup_brief")
+    require(isinstance(startup_brief, dict), "SESSION_CONTEXT_JSON requires startup_brief object.")
+    require("project_launched" in startup_brief, "startup_brief.project_launched is required.")
+    require("current_focus" in startup_brief, "startup_brief.current_focus is required.")
+    require("next_actions" in startup_brief, "startup_brief.next_actions is required.")
     project_type = payload.get("project_type")
     repo_mode = payload.get("repo_context_mode")
     repo_snapshot = payload.get("repo_snapshot")
@@ -390,6 +528,69 @@ def command_add(args: argparse.Namespace, registry: dict[str, Any], registry_pat
     return 0
 
 
+def command_edit(args: argparse.Namespace, registry: dict[str, Any], registry_path: Path) -> int:
+    item = get_project(registry, args.project)
+    project_type = item["project_type"]
+
+    if args.display_name is not None:
+        value = args.display_name.strip()
+        require(bool(value), "--display-name cannot be empty.")
+        item["display_name"] = value
+
+    if args.status is not None:
+        item["status"] = args.status
+
+    if args.tags is not None:
+        item["tags"] = [str(tag).strip() for tag in args.tags if str(tag).strip()]
+
+    if args.project_root is not None:
+        value = args.project_root.strip()
+        require(value.startswith("_ai/projects/"), "--project-root must start with _ai/projects/.")
+        item["drive_paths"]["project_root"] = value
+
+    repo_fields_provided = any(
+        value is not None
+        for value in (
+            args.repo_url,
+            args.default_branch,
+            args.workspace_path,
+            args.repo_project_key,
+        )
+    )
+    if repo_fields_provided:
+        require(project_type == "repo_backed", "Repo binding fields can only be edited for repo_backed projects.")
+        repo_binding = item.get("repo_binding")
+        if not isinstance(repo_binding, dict):
+            repo_binding = {}
+            item["repo_binding"] = repo_binding
+        if args.repo_url is not None:
+            value = args.repo_url.strip()
+            require(bool(value), "--repo-url cannot be empty.")
+            repo_binding["repo_url"] = value
+        if args.default_branch is not None:
+            value = args.default_branch.strip()
+            require(bool(value), "--default-branch cannot be empty.")
+            repo_binding["default_branch"] = value
+        if args.workspace_path is not None:
+            value = args.workspace_path.strip()
+            if value:
+                repo_binding["workspace_path"] = value
+            elif "workspace_path" in repo_binding:
+                del repo_binding["workspace_path"]
+        if args.repo_project_key is not None:
+            value = args.repo_project_key.strip()
+            if value:
+                repo_binding["repo_project_key"] = value
+            elif "repo_project_key" in repo_binding:
+                del repo_binding["repo_project_key"]
+
+    item["updated_at"] = now_utc()
+    validate_project_item(item)
+    save_registry(registry_path, registry)
+    print(json.dumps(item, indent=2))
+    return 0
+
+
 def command_archive(args: argparse.Namespace, registry: dict[str, Any], registry_path: Path) -> int:
     item = get_project(registry, args.project)
     item["status"] = "archived"
@@ -458,6 +659,14 @@ def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root
             "repo_context_mode": repo_mode,
         },
     )
+    execution_gate = {"chatgpt_planning_required_before_codex_execution": True}
+    startup_brief = derive_startup_brief(
+        project_item=item,
+        drive_context=drive_context,
+        repo_snapshot_payload=repo_snapshot_payload,
+        codex_published_state=codex_published_state,
+        execution_gate=execution_gate,
+    )
     generated_at = now_utc()
     payload = {
         "schema_version": "1",
@@ -472,7 +681,10 @@ def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root
         "drive_context": drive_context,
         "repo_snapshot": repo_snapshot_payload,
         "codex_published_state": codex_published_state,
-        "execution_gate": {"chatgpt_planning_required_before_codex_execution": True},
+        "execution_gate": execution_gate,
+        "startup_brief": startup_brief,
+        "agent_expected_behavior": "summarize_then_choose_next_step",
+        "agent_contract": build_session_agent_contract(),
     }
     payload["context_hash"] = compute_context_hash(payload)
     validate_session_context(payload)
@@ -517,6 +729,17 @@ def main() -> int:
     add_parser.add_argument("--init-memory", action="store_true", default=True)
     add_parser.add_argument("--no-init-memory", dest="init_memory", action="store_false")
 
+    edit_parser = subparsers.add_parser("edit", help="Edit an existing project.")
+    edit_parser.add_argument("--project", required=True)
+    edit_parser.add_argument("--display-name", default=None)
+    edit_parser.add_argument("--status", choices=["active", "paused", "archived"], default=None)
+    edit_parser.add_argument("--tags", nargs="*", default=None)
+    edit_parser.add_argument("--project-root", default=None)
+    edit_parser.add_argument("--repo-url", default=None)
+    edit_parser.add_argument("--default-branch", default=None)
+    edit_parser.add_argument("--workspace-path", default=None)
+    edit_parser.add_argument("--repo-project-key", default=None)
+
     archive_parser = subparsers.add_parser("archive", help="Archive a project.")
     archive_parser.add_argument("--project", required=True)
 
@@ -539,6 +762,8 @@ def main() -> int:
         return command_list(registry)
     if args.command == "add":
         return command_add(args, registry, registry_path, drive_root)
+    if args.command == "edit":
+        return command_edit(args, registry, registry_path)
     if args.command == "archive":
         return command_archive(args, registry, registry_path)
     if args.command == "delete":
