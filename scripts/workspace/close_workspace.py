@@ -105,6 +105,7 @@ def derive_project_paths(project_abs_root: Path) -> dict[str, Path]:
         "profile": project_abs_root / "profile.json",
         "milestones": project_abs_root / "milestones.json",
         "timeline": project_abs_root / "timeline.json",
+        "sessions_log": project_abs_root / "sessions.log.jsonl",
         "reasoning_notes_dir": project_abs_root / "reasoning_notes",
         "repo_handoff_json": project_abs_root / "repo_snapshot" / "latest_codex_handoff.json",
     }
@@ -120,6 +121,25 @@ def load_handoff(path: Path, project_slug: str) -> dict[str, Any]:
     for key in ("repo_memory_updated", "commit_created", "push_completed", "snapshot_exported"):
         require(checks.get(key) is True, f"codex_handoff repo_close_checks.{key} must be true.")
     return payload
+
+
+def append_session_log(
+    log_path: Path,
+    project_slug: str,
+    event_type: str,
+    session_id: str,
+    metadata: dict[str, Any],
+) -> None:
+    entry = {
+        "timestamp": now_utc(),
+        "project_slug": project_slug,
+        "event_type": event_type,
+        "session_id": session_id,
+        "metadata": metadata,
+    }
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(entry, separators=(",", ":"), ensure_ascii=False) + "\n")
 
 
 def write_reasoning_note(
@@ -300,6 +320,17 @@ def main() -> int:
         load_handoff(handoff_path, project_item["project_slug"])
         repo_handoff_ref = f"{project_root_rel}/repo_snapshot/latest_codex_handoff.json"
         repo_handoff_consumed = True
+    append_session_log(
+        log_path=paths["sessions_log"],
+        project_slug=project_item["project_slug"],
+        event_type="close_start",
+        session_id=session_id,
+        metadata={
+            "runtime": args.runtime,
+            "project_type": project_item["project_type"],
+            "repo_context_mode": repo_context_mode,
+        },
+    )
 
     note_path = write_reasoning_note(
         reasoning_dir=paths["reasoning_notes_dir"],
@@ -375,6 +406,17 @@ def main() -> int:
     if output_path:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(serialized + "\n", encoding="utf-8")
+    append_session_log(
+        log_path=paths["sessions_log"],
+        project_slug=project_item["project_slug"],
+        event_type="close_emit",
+        session_id=session_id,
+        metadata={
+            "repo_context_mode": repo_context_mode,
+            "repo_handoff_consumed": repo_handoff_consumed,
+            "next_session_focus": next_session_focus,
+        },
+    )
     print(serialized)
     return 0
 

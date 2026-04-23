@@ -15,6 +15,12 @@ Refresh policy:
 - Do not regenerate startup artifacts by default.
 - Regenerate only if artifacts are missing, stale, invalid, or explicitly requested.
 
+Stable operating contract path (Drive continuity lane):
+- `_ai/projects/<project_slug>/operating_rules.md`
+
+Append-only action trail path:
+- `_ai/projects/<project_slug>/sessions.log.jsonl`
+
 ## Close order (repo_backed)
 
 1. Codex updates repo memory.
@@ -44,14 +50,15 @@ In this pass, the Strategy -> Codex task contract is formalized (v1 schema, loca
 
 - `codex_published_state`:
   - produced by: `scripts/workspace/export_repo_context.py publish-state`
-  - purpose: startup context supplement for planning and freshness checks
+  - startup/current code-domain status artifact
   - startup consumption: Start Workspace reads this artifact (Drive mirror first, repo-local fallback)
+  - authorship/placement: repo-authored, mirrored to Drive for strategy-side reading
   - close consumption: not consumed by Close Workspace
 
 - `codex_handoff`:
   - produced by: `scripts/workspace/export_repo_context.py handoff`
-  - purpose: explicit close contract proving repo-close checks and carrying session handoff summary
+  - close/session-end continuity handoff artifact
   - startup consumption: not consumed by Start Workspace
   - close consumption: required input for repo_backed close flow
 
-The two artifacts are independent artifacts with different lifecycle points and purposes; `codex_handoff` is not treated as a delta over `codex_published_state`.
+The two artifacts are independent artifacts, not delta/patch versions of each other.

@@ -72,6 +72,7 @@ def derive_project_paths(project_abs_root: Path) -> dict[str, Path]:
         "goals": project_abs_root / "goals.md",
         "milestones": project_abs_root / "milestones.json",
         "timeline": project_abs_root / "timeline.json",
+        "sessions_log": project_abs_root / "sessions.log.jsonl",
         "reasoning_notes_dir": project_abs_root / "reasoning_notes",
         "repo_snapshot_json": project_abs_root / "repo_snapshot" / "latest_interpreter_snapshot.json",
         "repo_snapshot_md": project_abs_root / "repo_snapshot" / "latest_interpreter_snapshot.md",
@@ -82,6 +83,25 @@ def derive_project_paths(project_abs_root: Path) -> dict[str, Path]:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def append_session_log(
+    log_path: Path,
+    project_slug: str,
+    event_type: str,
+    session_id: str,
+    metadata: dict[str, Any],
+) -> None:
+    entry = {
+        "timestamp": now_utc(),
+        "project_slug": project_slug,
+        "event_type": event_type,
+        "session_id": session_id,
+        "metadata": metadata,
+    }
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(entry, separators=(",", ":"), ensure_ascii=False) + "\n")
 
 
 def validate_registry_payload(registry: dict[str, Any]) -> None:
@@ -426,11 +446,23 @@ def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root
         repo_mode = "absent"
         codex_published_state = None
 
+    session_id = str(uuid.uuid4())
+    append_session_log(
+        log_path=paths["sessions_log"],
+        project_slug=item["project_slug"],
+        event_type="launcher_start",
+        session_id=session_id,
+        metadata={
+            "runtime": args.runtime,
+            "project_type": item["project_type"],
+            "repo_context_mode": repo_mode,
+        },
+    )
     generated_at = now_utc()
     payload = {
         "schema_version": "1",
         "contract_version": "1.0",
-        "session_id": str(uuid.uuid4()),
+        "session_id": session_id,
         "generated_at": generated_at,
         "stale_after": stale_after_24h(generated_at),
         "project_slug": item["project_slug"],
@@ -448,6 +480,17 @@ def command_start(args: argparse.Namespace, registry: dict[str, Any], drive_root
     if output_path is not None:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(serialized + "\n", encoding="utf-8")
+    append_session_log(
+        log_path=paths["sessions_log"],
+        project_slug=item["project_slug"],
+        event_type="launcher_emit",
+        session_id=session_id,
+        metadata={
+            "repo_context_mode": repo_mode,
+            "stale_after": payload["stale_after"],
+            "context_hash": payload["context_hash"],
+        },
+    )
     print(serialized)
     return 0
 
