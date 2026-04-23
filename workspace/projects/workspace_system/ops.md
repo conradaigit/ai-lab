@@ -1,5 +1,36 @@
 # ops
 
+## Launcher behavior contract
+
+The notebook emits and consumes structured packets. The AI agent is responsible for interpreting those packets, presenting numbered options to the user, generating the next structured input, and resuming work from returned session context.
+Canonical contract doc: `workspace/projects/workspace_system/launcher_contract.md`
+
+Block 1 contract:
+- Block 1 emits `LAUNCHER_READINESS_PACKET` only.
+- The notebook does not present an interactive menu.
+- The user pastes the packet to the AI agent.
+- The AI agent must:
+  - summarize status, active non-archived projects, and important warnings/blockers
+  - present numbered options
+  - wait for user selection before producing Block 2 input
+
+Required menu format after Block 1:
+- `1.) continue <best default active project>`
+- `2.) start/add a new project`
+- `3.) edit an existing project`
+- `4.) manage archived/delete/list projects`
+
+Selection rules:
+- exactly one active project: use it as option 1 default continue target
+- multiple active projects: option 1 becomes continue existing; list active slugs under it
+- zero active projects: omit continue and start numbering at start/add
+
+Block 2 contract:
+- Block 2 consumes exact `LAUNCH SUMMARY V1` JSON and dispatches one launcher action.
+- `continue`/`start` actions emit `SESSION_CONTEXT_JSON`; management actions emit direct command result JSON.
+- When `SESSION_CONTEXT_JSON` is returned, the AI agent summarizes startup context and continues in planning mode.
+- The AI agent does not rely on prior chat history to continue.
+
 ## Startup order (repo_backed)
 
 1. Codex starts in canonical repo.
