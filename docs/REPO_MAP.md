@@ -156,7 +156,7 @@ The operating model expects docs such as:
 
 - `docs/ARCHITECTURE.md`
 - `docs/REPO_MAP.md`
-- `docs/REBUILD_FROM_ZERO.md`
+- `docs/SYSTEM_RECOVERY_GUIDE.md`
 - `docs/ENVIRONMENTS.md`
 - `docs/DATA_CATALOG.md`
 

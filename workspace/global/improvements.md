@@ -2,7 +2,7 @@
 
 - Add `docs/ARCHITECTURE.md`
 - Add `docs/REPO_MAP.md`
-- Add `docs/REBUILD_FROM_ZERO.md`
+- Add `docs/SYSTEM_RECOVERY_GUIDE.md`
 - Add `docs/ENVIRONMENTS.md`
 - Add `docs/DATA_CATALOG.md`
 - Add `docs/SECRETS_INVENTORY.md`
