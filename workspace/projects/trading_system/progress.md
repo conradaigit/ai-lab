@@ -21,15 +21,24 @@
   - health check script
   - receipt-aware session start/close behavior
 - Phase 1.5 reliability hardening committed successfully
+- WSL-backed VS Code + Codex workflow verified
+- Core architecture, repo map, rebuild, and environments docs added
+- Repo-scoped autosave settings added in `.vscode/settings.json`
+- Close-session procedure updated to include memory update, health check, commit, and push
+- GitHub remote configured and latest commits pushed to `origin/main`
+- Polygon/Massive authenticated smoke test completed with safe secret handling
+- Cross-asset coverage probe completed for stocks, grouped daily, short volume, short interest, indices, forex, crypto, and futures
+- History-depth probe completed across representative windows with paced retry handling for transient 429 limits
+- Entitlement boundaries documented: deeper historical windows, index aggregates, and futures access are blocked on the current plan
 
 ## Current milestone
-Phase 1 local-first foundation and Phase 1.5 reliability hardening are complete.
+Backtesting data-access baseline is verified; next milestone is selecting the required paid tier and converting findings into archive-ingestion implementation.
 
 ## Immediate next move
-Verify and normalize the local VS Code + Codex workflow from WSL.
+Select the required Polygon/Massive paid tier for the target historical archive and index/futures coverage.
 
 ## Why this matters
-The repo-native agent operating model is now cleaner, safer, and more machine-readable. The next step is to move normal coding work into a local repo-backed Codex workflow.
+We now have evidence-backed access boundaries instead of assumptions, so we can scope archive ingestion work accurately and avoid building around unavailable data ranges or asset classes.
 
 ## Next milestone
-WSL-backed VS Code + Codex workflow verified, normalized, and aligned with the startup protocol in `AGENTS.md`.
+Paid tier, universe windows, and ingestion constraints are locked so backfill implementation can proceed with predictable coverage.

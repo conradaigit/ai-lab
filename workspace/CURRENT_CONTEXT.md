@@ -1,36 +1,32 @@
 # CURRENT_CONTEXT
 
 ## Active project
-workspace_system
+trading_system
 
 ## Current focus
-Frozen v1 workspace contracts and scripts are implemented. Immediate focus is wiring the notebook cells and running real Drive end-to-end validation.
+Select required Polygon paid tier for archive depth and index/futures coverage
 
 ## Last completed work
-- Added frozen v1 schemas for registry/session context/codex handoff/close receipt
-- Implemented repo exporter outputs in `scripts/workspace/export_repo_context.py`
-- Implemented Start Workspace flow in `scripts/workspace/start_workspace.py`
-- Implemented Close Workspace flow in `scripts/workspace/close_workspace.py`
-- Verified dry-runs for both `repo_backed` and `drive_native` branches with `py_compile` passing
+- Validated POLYGON_API_KEY visibility and authenticated Polygon request without exposing key
+- Ran cross-asset coverage probe for stocks grouped-daily short-data indices forex crypto and futures
+- Ran history-depth probe across representative windows and resolved 429 ambiguity with paced retries
+- Confirmed entitlement blocks on deeper history plus index/futures access and produced paid-vs-current recommendations
 
 ## Next 1-3 actions
-1. Integrate script-equivalent logic into actual Colab Start Workspace notebook cells
-2. Integrate script-equivalent logic into actual Colab Close Workspace notebook cells
-3. Run one real Drive end-to-end trial for both project types and confirm the `SESSION_CONTEXT_JSON`/handoff loop
+1. Select required Polygon paid tier for archive depth and index/futures coverage
+2. Finalize canonical asset universe and historical windows for backtesting ingestion
+3. Implement rate-limit-aware downloader manifests and checks for incremental backfill
 
 ## Important files to review first
 - `AGENTS.md`
 - `docs/SYSTEM_OPERATING_MANUAL.md`
-- `workspace/registry/projects.json`
-- `schemas/workspace/projects_registry.v1.json`
-- `schemas/workspace/session_context.v1.json`
-- `schemas/workspace/codex_handoff.v1.json`
-- `schemas/workspace/close_workspace_receipt.v1.json`
-- `workspace/projects/workspace_system/state.json`
-- `workspace/projects/workspace_system/tasks.json`
+- `workspace/projects/trading_system/state.json`
+- `workspace/projects/trading_system/tasks.json`
+- `workspace/projects/trading_system/constraints.md`
+- `workspace/projects/trading_system/ops.md`
+- `workspace/projects/trading_system/active_plan.md`
+- `workspace/projects/trading_system/progress.md`
+- `workspace/projects/trading_system/failure_registry.md`
 
 ## Notes
-- Runtime path mapping should resolve Drive-relative roots per environment:
-  - Colab: `/content/drive/MyDrive/...`
-  - WSL: `/mnt/g/My Drive/...`
-- Runtime exporter files remain local runtime artifacts and are intentionally ignored in Git.
+Updated by `scripts/workspace/close_session.py`.

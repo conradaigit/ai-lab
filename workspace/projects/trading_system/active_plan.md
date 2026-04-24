@@ -1,30 +1,25 @@
 # trading_system active plan
 
 ## Objective
-Stand up the local-first architecture so a coding agent can operate reliably with explicit repo memory, verification, lightweight reliability hardening, and minimal operator friction.
+Define the backtesting data-access baseline on the current Polygon/Massive account and map which planned datasets require paid upgrades before full archive ingestion begins.
 
 ## Current scope
-- keep the core operating docs aligned
-- verify and normalize the WSL-backed VS Code + Codex workflow
-- preserve rebuildability and reliability
+- validate authenticated access using safe key handling
+- probe representative asset classes and endpoint families for entitlement coverage
+- measure practical historical depth reachable on the current plan using low-cost sample requests
+- convert probe outcomes into concrete paid-vs-current planning decisions for archive build-out
 
 ## Success criteria
-- Phase 1 local-first foundation is complete and reflected in workspace memory
-- `schemas/memory_object_base.json` exists
-- `docs/SECRETS_INVENTORY.md` exists
-- `AGENTS.md` reflects the single-writer rule
-- `scripts/dev/health_check.py` exists and runs
-- `start_session.py` warns on incomplete prior close if needed
-- `close_session.py` records receipt progress
-- repo state remains coherent and machine-readable
-- VS Code opens `~/dev/ai-lab` from WSL
-- Codex can operate inside `~/dev/ai-lab`
-- current-state workspace files reflect the completed Phase 1.5 work and current workflow focus
+- env var visibility and authenticated request are verified without exposing secrets
+- access coverage is validated for stocks, grouped daily, short data, indices, forex, crypto, and futures representative probes
+- historical depth limits are sampled across recent, ~5y, ~10y, and ~20y windows where applicable
+- entitlement-blocked datasets are explicitly identified with 403 evidence
+- a concrete next-step plan exists for paid tier selection and archive ingestion design
 
 ## Ordered next steps
-1. verify the repo opens from WSL with `code .`
-2. verify and normalize Codex startup behavior against `AGENTS.md`
-3. record any workflow adjustments back into workspace memory
+1. choose the Polygon/Massive paid tier needed for target history depth and index/futures coverage
+2. finalize canonical asset universe plus required lookback windows for the backtesting archive
+3. implement a rate-limit-aware, manifest-driven ingestion/backfill workflow with verification checks
 
 ## Current step
-Step 1-3: verify and normalize WSL-backed VS Code + Codex
+Step 1: lock paid-tier decision from the validated entitlement matrix

@@ -39,9 +39,37 @@
     {
       "id": "TS-010",
       "title": "Verify and normalize WSL-backed VS Code + Codex workflow",
+      "status": "completed",
+      "priority": "medium",
+      "notes": "Verified the repo opens in a [WSL: Ubuntu] VS Code window, code --status reflects the remote WSL path, and Codex followed AGENTS.md startup behavior."
+    },
+    {
+      "id": "TS-011",
+      "title": "Normalize GitHub auth and local Git identity",
       "status": "todo",
       "priority": "medium",
-      "notes": "Verify code . opens ~/dev/ai-lab from WSL, confirm Codex follows AGENTS.md, and normalize any local workflow issues."
+      "notes": "Fix git user.email from the placeholder value, re-authenticate gh CLI, and confirm both git push and gh auth status work cleanly."
+    },
+    {
+      "id": "TS-012",
+      "title": "Probe Polygon/Massive access coverage and history depth",
+      "status": "completed",
+      "priority": "high",
+      "notes": "Validated authenticated access and measured entitlement/history boundaries across stocks, grouped daily, short data, indices, forex, crypto, and futures using safe, low-cost representative probes."
+    },
+    {
+      "id": "TS-013",
+      "title": "Select required Polygon/Massive paid tier",
+      "status": "todo",
+      "priority": "high",
+      "notes": "Choose the subscription tier needed for target historical depth plus index/futures coverage based on the completed probe evidence."
+    },
+    {
+      "id": "TS-014",
+      "title": "Define backtesting archive ingestion constraints",
+      "status": "todo",
+      "priority": "high",
+      "notes": "Lock canonical universe, timeframe depth, and rate-limit-aware ingestion/check strategy before starting full backfill."
     }
   ]
 }

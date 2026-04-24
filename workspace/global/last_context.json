@@ -1,17 +1,17 @@
 {
-  "last_opened_project": "workspace_system",
-  "current_focus": "Frozen v1 workspace contracts and scripts are implemented; next focus is notebook integration and real Drive end-to-end validation.",
+  "last_opened_project": "trading_system",
+  "current_focus": "Select required Polygon paid tier for archive depth and index/futures coverage",
   "last_completed_work": [
-    "Implemented frozen v1 schemas for projects registry, session context, codex handoff, and close receipt",
-    "Implemented exporter flow for interpreter snapshot and codex handoff with Drive mirror paths",
-    "Implemented Start Workspace and Close Workspace scripts with explicit repo_backed vs drive_native branching",
-    "Verified both flows with local dry-runs and successful py_compile checks"
+    "Validated POLYGON_API_KEY visibility and authenticated Polygon request without exposing key",
+    "Ran cross-asset coverage probe for stocks grouped-daily short-data indices forex crypto and futures",
+    "Ran history-depth probe across representative windows and resolved 429 ambiguity with paced retries",
+    "Confirmed entitlement blocks on deeper history plus index/futures access and produced paid-vs-current recommendations"
   ],
   "next_actions": [
-    "Wire the Start Workspace notebook cells to the frozen v1 behavior",
-    "Wire the Close Workspace notebook cells to the frozen v1 behavior",
-    "Run a real Drive end-to-end trial for repo_backed and drive_native projects"
+    "Select required Polygon paid tier for archive depth and index/futures coverage",
+    "Finalize canonical asset universe and historical windows for backtesting ingestion",
+    "Implement rate-limit-aware downloader manifests and checks for incremental backfill"
   ],
   "last_started_at_utc": "2026-04-15T00:00:00+00:00",
-  "last_closed_at_utc": null
+  "last_closed_at_utc": "2026-04-24T06:15:43+00:00"
 }

@@ -2,26 +2,24 @@
   "project": "trading_system",
   "status": "active",
   "phase": "phase_1_5_complete",
-  "objective": "Build a local-first, rebuildable agent operating system with explicit repo memory, lightweight reliability hardening, and a clean path to local Codex operation before deeper cloud and automation work.",
-  "current_focus": "Verify and normalize the local VS Code + Codex workflow from WSL.",
+  "objective": "Validate Polygon/Massive current-plan access and history depth for backtesting database planning",
+  "current_focus": "Select required Polygon paid tier for archive depth and index/futures coverage",
   "last_completed": [
-    "Completed Phase 1 local-first foundation",
-    "Defined the base memory object schema",
-    "Added the secrets inventory document",
-    "Updated AGENTS.md with the single-writer workspace rule",
-    "Implemented the health check script",
-    "Implemented receipt-aware start_session.py behavior",
-    "Implemented receipt-aware close_session.py behavior",
-    "Verified health check, startup, and close-session receipt behavior",
-    "Committed the Phase 1.5 reliability hardening changes"
+    "Validated POLYGON_API_KEY visibility and authenticated Polygon request without exposing key",
+    "Ran cross-asset coverage probe for stocks grouped-daily short-data indices forex crypto and futures",
+    "Ran history-depth probe across representative windows and resolved 429 ambiguity with paced retries",
+    "Confirmed entitlement blocks on deeper history plus index/futures access and produced paid-vs-current recommendations"
   ],
-  "blockers": [],
+  "blockers": [
+    "Historical windows beyond recent ranges are blocked for several asset classes on current plan",
+    "Index aggregates and futures access are blocked by entitlement on current plan"
+  ],
   "next_actions": [
-    "Verify code . opens ~/dev/ai-lab correctly from WSL",
-    "Verify and normalize Codex startup behavior against AGENTS.md",
-    "Refresh workspace memory based on the verified local VS Code + Codex workflow"
+    "Select required Polygon paid tier for archive depth and index/futures coverage",
+    "Finalize canonical asset universe and historical windows for backtesting ingestion",
+    "Implement rate-limit-aware downloader manifests and checks for incremental backfill"
   ],
   "git_status_before_refresh": "clean",
   "last_started_at_utc": null,
-  "last_closed_at_utc": "2026-03-21T00:58:31+00:00"
+  "last_closed_at_utc": "2026-04-24T06:15:43+00:00"
 }
